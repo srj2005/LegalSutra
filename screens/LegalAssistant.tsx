@@ -7,6 +7,7 @@ import { useNavigation } from "@react-navigation/native"
 import { Ionicons } from "@expo/vector-icons"
 import * as Speech from "expo-speech"
 import Voice from "@react-native-voice/voice"
+import { SpeechResultsEvent } from "@react-native-voice/voice";
 
 export default function LegalAssistant() {
   const navigation = useNavigation()
@@ -23,7 +24,7 @@ export default function LegalAssistant() {
     }
   }, [])
 
-  const onSpeechResults = (e) => {
+  const onSpeechResults = (e: SpeechResultsEvent) => {
     if (e.value && e.value[0]) {
       const userMessage = { id: messages.length + 1, text: e.value[0], sender: "user" }
       setMessages((prevMessages) => [...prevMessages, userMessage])
@@ -49,8 +50,7 @@ export default function LegalAssistant() {
     }
   }
 
-  const handleBotResponse = (userMessage) => {
-    // Simulate bot response (in a real app, this would be an API call)
+  const handleBotResponse = (userMessage: any) => {
     setTimeout(() => {
       const botResponse = {
         id: messages.length + 2,
@@ -62,7 +62,7 @@ export default function LegalAssistant() {
     }, 1000)
   }
 
-  const speakBotResponse = async (text) => {
+  const speakBotResponse = async (text:string) => {
     setIsSpeaking(true)
     try {
       await Speech.speak(text, {

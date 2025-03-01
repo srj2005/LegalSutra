@@ -1,16 +1,16 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useNavigation } from "@react-navigation/native"
-import { Ionicons } from "@expo/vector-icons"
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RiskAssessment() {
   const navigation = useNavigation()
-  const riskScore = 75 // Example risk score
+  const riskScore = 75
 
   const getRiskColor = (score: number) => {
-    if (score < 30) return "#22c55e" // green-500
-    if (score < 60) return "#eab308" // yellow-500
-    return "#ef4444" // red-500
+    if (score < 30) return "#22c55e" 
+    if (score < 60) return "#eab308" 
+    return "#ef4444" 
   }
 
   return (
@@ -20,13 +20,13 @@ export default function RiskAssessment() {
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Risk Assessment</Text>
-        <View style={{ width: 24 }} /> {/* Empty view for spacing */}
+        <View style={{ width: 24 }} /> 
       </View>
 
       <ScrollView style={styles.content}>
         <View style={styles.card}>
           <View style={styles.riskScoreContainer}>
-            <Ionicons name="alert-triangle" size={24} color={getRiskColor(riskScore)} />
+            <Ionicons name={"alert-triangle" as any} size={24} color={getRiskColor(riskScore)} />
             <Text style={styles.riskScoreTitle}>Risk Score</Text>
           </View>
           <View style={styles.riskScoreValueContainer}>
@@ -40,13 +40,15 @@ export default function RiskAssessment() {
           </Text>
         </View>
 
+        
+
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Compliance with Indian Laws</Text>
-          <View style={styles.complianceList}>
-            <ComplianceItem icon="checkmark-circle" color="#22c55e" text="Adheres to Rent Control Act" />
-            <ComplianceItem icon="checkmark-circle" color="#22c55e" text="Follows standard eviction procedures" />
-            <ComplianceItem icon="close-circle" color="#ef4444" text="Security deposit exceeds legal limit" />
-          </View>
+            <View style={styles.complianceList}>
+              <ComplianceItem icon={"checkmark-circle" as any} color="#22c55e" text="Adheres to Rent Control Act" />
+              <ComplianceItem icon={"checkmark-circle" as any} color="#22c55e" text="Follows standard eviction procedures" />
+              <ComplianceItem icon={"close-circle" as any} color="#ef4444" text="Security deposit exceeds legal limit" />
+            </View>
         </View>
 
         <View style={styles.card}>
@@ -67,7 +69,20 @@ export default function RiskAssessment() {
   )
 }
 
-function ComplianceItem({ icon, color, text }) {
+type IconName = 
+  | "cloud-upload"
+  | "document-text"
+  | "shield-checkmark"
+  | "chatbubbles"
+  | "chevron-forward";
+
+interface FeatureCardProps {
+  icon: IconName; 
+  color: string; 
+  text:string;
+}
+
+function ComplianceItem({ icon,color, text }: FeatureCardProps) {
   return (
     <View style={styles.complianceItem}>
       <Ionicons name={icon} size={20} color={color} />
@@ -76,10 +91,15 @@ function ComplianceItem({ icon, color, text }) {
   )
 }
 
-function IssueItem({ title, description }) {
+interface RecentContractCardProps {
+  title: string;
+  description: string;
+}
+
+function IssueItem({ title, description }:RecentContractCardProps) {
   return (
     <View style={styles.issueItem}>
-      <Ionicons name="alert-triangle" size={20} color="#eab308" />
+      <Ionicons name={"alert-triangle" as any} size={20} color="#eab308" />
       <View style={styles.issueTextContainer}>
         <Text style={styles.issueTitle}>{title}</Text>
         <Text style={styles.issueDescription}>{description}</Text>
