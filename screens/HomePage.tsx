@@ -1,132 +1,164 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import { useNavigation } from "@react-navigation/native"
-import { Ionicons } from "@expo/vector-icons"
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+import { StackNavigationProp } from "@react-navigation/stack";
+
+// Define Navigation Types
+type RootStackParamList = {
+  Home: undefined;
+  LanguageSelection: undefined;
+  ContractUpload: undefined;
+  ContractSummary: undefined;
+  RiskAssessment: undefined;
+  LegalAssistant: undefined;
+};
+
+type NavigationProps = StackNavigationProp<RootStackParamList, "Home">;
 
 export default function HomePage() {
-  const navigation = useNavigation()
+  const navigation = useNavigation<NavigationProps>();
+
+  const recentContracts = [
+    { id: "1", title: "Rental Agreement", date: "Uploaded on 4 Feb, 2025" },
+    { id: "2", title: "Employment Contract", date: "Uploaded on 1 Feb, 2025" },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>LegalSutra</Text>
-        <TouchableOpacity onPress={() => navigation.navigate("LanguageSelection" as never)}>
-          <Ionicons name="language" size={24} color="white" />
+        <TouchableOpacity onPress={() => navigation.navigate("LanguageSelection")} activeOpacity={0.7}>
+          <Ionicons name="language" size={24} color={colors.white} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
-        <Text style={styles.welcomeText}>Welcome, User</Text>
-        <Text style={styles.subText}>What would you like to do today?</Text>
+      {/* Main Content - Use FlatList as the main container */}
+      <FlatList
+        data={recentContracts}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <RecentContractCard title={item.title} date={item.date} onPress={() => navigation.navigate("ContractSummary")} />
+        )}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.welcomeText}>Welcome, User</Text>
+            <Text style={styles.subText}>What would you like to do today?</Text>
 
-        <TouchableOpacity style={styles.uploadButton} onPress={() => navigation.navigate("ContractUpload" as never)}>
-          <Ionicons name="cloud-upload" size={24} color="white" />
-          <Text style={styles.uploadButtonText}>Upload New Contract</Text>
-        </TouchableOpacity>
+            {/* Upload Button */}
+            <TouchableOpacity
+              style={styles.uploadButton}
+              onPress={() => navigation.navigate("ContractUpload")}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="cloud-upload" size={24} color={colors.white} />
+              <Text style={styles.uploadButtonText}>Upload New Contract</Text>
+            </TouchableOpacity>
 
-        <View style={styles.featuresContainer}>
-          <Text style={styles.sectionTitle}>Features</Text>
-          <View style={styles.featuresGrid}>
-            <FeatureCard
-              icon="document-text"
-              title="Contract Summary"
-              onPress={() => navigation.navigate("ContractSummary" as never)}
-            />
-            <FeatureCard
-              icon="shield-checkmark"
-              title="Risk Assessment"
-              onPress={() => navigation.navigate("RiskAssessment" as never)}
-            />
-            <FeatureCard
-              icon="chatbubbles"
-              title="Legal Assistant"
-              onPress={() => navigation.navigate("LegalAssistant" as never)}
-            />
-          </View>
-        </View>
+            {/* Features Section */}
+            <View style={styles.featuresContainer}>
+              <Text style={styles.sectionTitle}>Features</Text>
+              <View style={styles.featuresGrid}>
+                <FeatureCard icon="document-text" title="Contract Summary" onPress={() => navigation.navigate("ContractSummary")} />
+                <FeatureCard icon="shield-checkmark" title="Risk Assessment" onPress={() => navigation.navigate("RiskAssessment")} />
+                <FeatureCard icon="chatbubbles" title="Legal Assistant" onPress={() => navigation.navigate("LegalAssistant")} />
+              </View>
+            </View>
 
-        <View style={styles.recentContractsContainer}>
-          <Text style={styles.sectionTitle}>Recent Contracts</Text>
-          <RecentContractCard
-            title="Rental Agreement"
-            date="Uploaded on 4 Feb, 2025"
-            onPress={() => navigation.navigate("ContractSummary" as never)}
-          />
-          <RecentContractCard
-            title="Employment Contract"
-            date="Uploaded on 1 Feb, 2025"
-            onPress={() => navigation.navigate("ContractSummary" as never)}
-          />
-        </View>
-      </ScrollView>
+            {/* Recent Contracts Section */}
+            <Text style={styles.sectionTitle}>Recent Contracts</Text>
+          </>
+        }
+      />
     </SafeAreaView>
-  )
+  );
 }
 
-function FeatureCard({ icon, title, onPress }) {
+// Feature Card Component
+interface FeatureCardProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  onPress: () => void;
+}
+
+function FeatureCard({ icon, title, onPress }: FeatureCardProps) {
   return (
-    <TouchableOpacity style={styles.featureCard} onPress={onPress}>
-      <Ionicons name={icon} size={32} color="#1a365d" />
+    <TouchableOpacity style={styles.featureCard} onPress={onPress} activeOpacity={0.7}>
+      <Ionicons name={icon} size={32} color={colors.primary} />
       <Text style={styles.featureCardTitle}>{title}</Text>
     </TouchableOpacity>
-  )
+  );
 }
 
-function RecentContractCard({ title, date, onPress }) {
+// Recent Contract Card Component
+interface RecentContractCardProps {
+  title: string;
+  date: string;
+  onPress: () => void;
+}
+
+function RecentContractCard({ title, date, onPress }: RecentContractCardProps) {
   return (
-    <TouchableOpacity style={styles.recentContractCard} onPress={onPress}>
+    <TouchableOpacity style={styles.recentContractCard} onPress={onPress} activeOpacity={0.7}>
       <View>
         <Text style={styles.recentContractTitle}>{title}</Text>
         <Text style={styles.recentContractDate}>{date}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={24} color="#1a365d" />
+      <Ionicons name="chevron-forward" size={24} color={colors.primary} />
     </TouchableOpacity>
-  )
+  );
 }
 
+// Centralized Colors for Consistency
+const colors = {
+  primary: "#1a365d",
+  secondary: "#008080",
+  white: "#ffffff",
+  textGray: "#666",
+  background: "#f5f5f5",
+};
+
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#1a365d",
+    backgroundColor: colors.primary,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "white",
-  },
-  content: {
-    flex: 1,
-    padding: 16,
+    color: colors.white,
   },
   welcomeText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1a365d",
+    color: colors.primary,
     marginBottom: 8,
   },
   subText: {
     fontSize: 16,
-    color: "#666",
+    color: colors.textGray,
     marginBottom: 24,
   },
   uploadButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#008080",
+    backgroundColor: colors.secondary,
     padding: 16,
     borderRadius: 8,
     marginBottom: 24,
   },
   uploadButtonText: {
-    color: "white",
+    color: colors.white,
     fontSize: 18,
     fontWeight: "bold",
     marginLeft: 8,
@@ -137,7 +169,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#1a365d",
+    color: colors.primary,
     marginBottom: 16,
   },
   featuresGrid: {
@@ -147,7 +179,7 @@ const styles = StyleSheet.create({
   },
   featureCard: {
     width: "48%",
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 8,
     padding: 16,
     alignItems: "center",
@@ -156,18 +188,15 @@ const styles = StyleSheet.create({
   featureCardTitle: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#1a365d",
+    color: colors.primary,
     marginTop: 8,
     textAlign: "center",
-  },
-  recentContractsContainer: {
-    marginBottom: 24,
   },
   recentContractCard: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 8,
     padding: 16,
     marginBottom: 8,
@@ -175,12 +204,12 @@ const styles = StyleSheet.create({
   recentContractTitle: {
     fontSize: 16,
     fontWeight: "500",
-    color: "#1a365d",
+    color: colors.primary,
   },
   recentContractDate: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textGray,
     marginTop: 4,
   },
-})
+});
 

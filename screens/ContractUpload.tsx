@@ -6,32 +6,39 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import { Alert } from 'react-native';
 
 export default function ContractUpload() {
   const navigation = useNavigation();
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const pickDocument = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-      });
+const pickDocument = async () => {
+  try {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    });
+    if (result.type === 'success') {
+      const fileInfo = await FileSystem.getInfoAsync(result.uri);
+      if (fileInfo.exists) {
+        const fileSizeInBytes = fileInfo.size;
 
-      if (result.type === 'success') {
-        setSelectedFile(result);
+        if (fileSizeInBytes > 10 * 1024 * 1024) {  
+          Alert.alert('File size exceeds the 10MB limit.');
+        } else {
+          setSelectedFile(result);
+        }
+      } else {
+        console.log('Error: File does not exist.');
       }
-    } catch (err) {
-      console.error('Error picking document:', err);
+    } else {
+      console.log('Document selection was canceled or failed');
     }
-  };
-
-  const uploadContract = () => {
-    if (selectedFile) {
-      // Here you would typically upload the file to your server
-      // For now, we'll just navigate to the ContractSummary screen
-      navigation.navigate('ContractSummary' as never);
-    }
-  };
+  } catch (err) {
+    console.error('Error picking document:', err);
+  }
+};
+ 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,7 +47,7 @@ export default function ContractUpload() {
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Upload Contract</Text>
-        <View style={{ width: 24 }} /> {/* Empty view for spacing */}
+        <View style={{ width: 24 }} /> 
       </View>
 
       <View style={styles.content}>

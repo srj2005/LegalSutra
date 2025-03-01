@@ -10,15 +10,15 @@ type NavigationProps = StackNavigationProp<any, any>
 
 export default function ContractSummaryPage() {
   const [activeTab, setActiveTab] = useState<string>("summary")
-  const navigation = useNavigation<NavigationProps>() // Use type for navigation
+  const navigation = useNavigation<NavigationProps>()
 
   const getRiskColor = (score: number) => {
-    if (score < 30) return "#22c55e" // green-500
-    if (score < 60) return "#eab308" // yellow-500
-    return "#ef4444" // red-500
+    if (score < 30) return "#22c55e" 
+    if (score < 60) return "#eab308"
+    return "#ef4444"
   }
 
-  const riskScore = 75 // Example risk score
+  const riskScore = 75 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -41,7 +41,7 @@ export default function ContractSummaryPage() {
           </View>
           <View style={[styles.progressBar, { backgroundColor: getRiskColor(riskScore) }]} />
           <View style={styles.riskMessageContainer}>
-            <Ionicons name="alert-triangle" size={16} color="#ef4444" />
+            <Ionicons name={"alert-triangle" as any} size={16} color="#ef4444" />
             <Text style={styles.riskMessage}>High risk. Review carefully.</Text>
           </View>
         </View>
