@@ -1,195 +1,236 @@
-"use client";
+// import React, { useState } from "react";
+// import axios from "axios";
 
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Upload, X, FileText } from "lucide-react";
-import lighthouse from "@lighthouse-web3/sdk";
-import { ethers } from "ethers";
-import kavach from "@lighthouse-web3/kavach";
+// function App() {
+//     const [file, setFile] = useState(null);
+//     const [password, setPassword] = useState("");
+//     const [filename, setFilename] = useState("");
 
-const apiKey = "e5d459c6.e9e327747ba24a76aaaf35a882a70f96";
+//     // Handle file selection
+//     const handleFileChange = (event) => {
+//         setFile(event.target.files[0]);
+//     };
 
-const DocumentUpload = () => {
-  const [file, setFile] = useState(null);
-  const [documentTitle, setDocumentTitle] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [cid, setCid] = useState(null);
-  const [error, setError] = useState("");
-  const [wallet, setWallet] = useState(null);
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
-  const fileInputRef = useRef(null);
+//     // Handle encryption upload
+//     const handleEncrypt = async () => {
+//         if (!file || !password) {
+//             alert("Please select a file and enter a password.");
+//             return;
+//         }
 
-  useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-        fetchWallet();
-      } else {
-        setUser(null);
-        navigate("/login");
-      }
-    });
+//         const formData = new FormData();
+//         formData.append("file", file);
+//         formData.append("password", password);
 
-    return () => unsubscribe();
-  }, [navigate]);
+//         try {
+//             const response = await axios.post("http://127.0.0.1:5000/upload", formData);
+//             alert(response.data.message);
+//         } catch (error) {
+//             alert("Error encrypting file.");
+//         }
+//     };
 
-  const fetchWallet = async () => {
-    try {
-      const response = await fetch("http://localhost:3001/lighthouse/generate-wallet");
+//     // Handle decryption and download
+//     const handleDecrypt = async () => {
+//         if (!filename || !password) {
+//             alert("Please enter the filename and password.");
+//             return;
+//         }
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch wallet: ${response.statusText}`);
-      }
+//         const formData = new FormData();
+//         formData.append("filename", filename);
+//         formData.append("password", password);
 
-      const data = await response.json();
-      setWallet(data);
-    } catch (err) {
-      console.error("Error fetching wallet:", err);
-      setError("Failed to generate wallet: " + err.message);
-    }
-  };
+//         try {
+//             const response = await axios.post("http://127.0.0.1:5000/decrypt", formData, {
+//                 responseType: "blob",
+//             });
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    if (selectedFile && selectedFile.type === "application/pdf") {
-      setFile(selectedFile);
-      setDocumentTitle(selectedFile.name.replace(".pdf", ""));
-      setError("");
-    } else {
-      setError("Only PDF files are supported");
-    }
-  };
+//             if (response.status === 401) {
+//                 alert("Incorrect password.");
+//                 return;
+//             }
 
-  const removeFile = () => {
-    setFile(null);
-    setDocumentTitle("");
-    setCid(null);
-  };
+//             if (response.status === 404) {
+//                 alert("File not found.");
+//                 return;
+//             }
 
-  const handleUpload = async () => {
-    if (!file || !user || !wallet?.privateKey) {
-      setError("Authentication required, and wallet must be generated");
-      return;
-    }
+//             // Create a download link
+//             const url = window.URL.createObjectURL(new Blob([response.data]));
+//             const link = document.createElement("a");
+//             link.href = url;
+//             link.setAttribute("download", filename);
+//             document.body.appendChild(link);
+//             link.click();
+//         } catch (error) {
+//             alert("Error decrypting file.");
+//         }
+//     };
 
-    try {
-      setUploading(true);
-      setError("");
+//     return (
+//         <div style={{ textAlign: "center", marginTop: "50px" }}>
+//             <h2>File Encryption & Decryption</h2>
 
-      const token = await user.getIdToken();
-      const signer = new ethers.Wallet(wallet.privateKey);
-      const authMessage = await kavach.getAuthMessage(signer.address);
-      const signedMessage = await signer.signMessage(authMessage.message);
+//             {/* File Upload Section */}
+//             <h3>Encrypt File</h3>
+//             <input type="file" onChange={handleFileChange} />
+//             <br />
+//             <input
+//                 type="password"
+//                 placeholder="Enter encryption password"
+//                 onChange={(e) => setPassword(e.target.value)}
+//             />
+//             <br />
+//             <button onClick={handleEncrypt}>Encrypt & Upload</button>
 
-      const result = await lighthouse.uploadEncrypted(
-        file,
-        apiKey,
-        wallet.publicKey,
-        signedMessage,
-        (progress) => console.log(`Upload progress: ${progress}%`)
-      );
+//             {/* File Download Section */}
+//             <h3>Decrypt File</h3>
+//             <input
+//                 type="text"
+//                 placeholder="Enter filename"
+//                 onChange={(e) => setFilename(e.target.value)}
+//             />
+//             <br />
+//             <input
+//                 type="password"
+//                 placeholder="Enter decryption password"
+//                 onChange={(e) => setPassword(e.target.value)}
+//             />
+//             <br />
+//             <button onClick={handleDecrypt}>Decrypt & Download</button>
+//         </div>
+//     );
+// }
 
-      if (result && result.data && result.data[0]?.Hash) {
-        setCid(result.data[0].Hash);
-      } else {
-        throw new Error("Upload failed! No CID received.");
-      }
+// export default App;
+import React, { useState } from "react";
+import axios from "axios";
 
-      const backendResponse = await fetch("http://localhost:3001/lighthouse/upload-encrypted", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          documentTitle,
-          cid: result.data[0].Hash,
-          walletAddress: wallet.publicKey,
-          signedMessage,
-          apiKey,
-        }),
-      });
+function App() {
+    const [file, setFile] = useState(null);
+    const [encryptPassword, setEncryptPassword] = useState("");
+    const [decryptPassword, setDecryptPassword] = useState("");
+    const [filename, setFilename] = useState("");
 
-      if (!backendResponse.ok) {
-        const errorData = await backendResponse.json();
-        setError(`Upload failed! Server responded with: ${errorData.message}`);
-        return;
-      }
+    // Handle file selection
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+    };
 
-      const responseData = await backendResponse.json();
-      console.log("Server Response Data:", responseData);
-    } catch (err) {
-      console.error("Upload Error:", err);
-      setError(err.message || "An error occurred while uploading the document.");
-    } finally {
-      setUploading(false);
-    }
-  };
+    // Handle encryption upload
+    const handleEncrypt = async () => {
+        if (!file || !encryptPassword) {
+            alert("Please select a file and enter a password.");
+            return;
+        }
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Upload Document</h1>
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Legal Document</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {error && <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4 text-sm">{error}</div>}
-            <div className="space-y-4">
-              {wallet && (
-                <div className="bg-gray-100 p-4 rounded-md">
-                  <h3 className="text-lg font-semibold">Generated Wallet</h3>
-                  <p><strong>Public Key:</strong> {wallet.publicKey}</p>
-                  <p><strong>Private Key:</strong> {wallet.privateKey}</p>
-                </div>
-              )}
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("password", encryptPassword);
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Document Title</label>
-                <Input value={documentTitle} onChange={(e) => setDocumentTitle(e.target.value)} placeholder="Enter document title" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File</label>
-                {!file ? (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-                    onClick={() => fileInputRef.current?.click()}>
-                    <input ref={fileInputRef} type="file" accept=".pdf" onChange={handleFileChange} className="hidden" />
-                    <Upload className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-600">Click to upload</p>
-                  </div>
-                ) : (
-                  <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-                    <FileText className="h-8 w-8 text-indigo-500 mr-3" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
-                    </div>
-                    <button type="button" onClick={removeFile} className="ml-4 p-1 rounded-full text-gray-400 hover:text-gray-500">
-                      <X className="h-5 w-5" />
+        try {
+            const response = await axios.post("http://127.0.0.1:5000/upload", formData);
+            alert(response.data.message);
+            setFilename(response.data.filename); // Store encrypted filename
+        } catch (error) {
+            alert("Error encrypting file.");
+        }
+    };
+
+    // Handle decryption and download
+    const handleDecrypt = async () => {
+        if (!filename || !decryptPassword) {
+            alert("Please enter the filename and password.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("filename", filename);
+        formData.append("password", decryptPassword);
+
+        try {
+            const response = await axios.post("http://127.0.0.1:5000/decrypt", formData, {
+                responseType: "blob",
+            });
+
+            if (response.status === 401) {
+                alert("Incorrect password.");
+                return;
+            }
+
+            if (response.status === 404) {
+                alert("File not found.");
+                return;
+            }
+
+            // Create a download link
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", filename.replace(".enc", ""));
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            alert("Error decrypting file.");
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
+            <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-6">
+                <h2 className="text-2xl font-semibold text-center text-gray-700 mb-6">
+                    🔐 File Encryption & Decryption
+                </h2>
+
+                {/* Encrypt File Section */}
+                <div className="mb-6">
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">Encrypt File</h3>
+                    <input 
+                        type="file" 
+                        onChange={handleFileChange} 
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" 
+                    />
+                    <input
+                        type="password"
+                        placeholder="Enter encryption password"
+                        className="w-full px-4 py-2 border rounded-lg mt-3 focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => setEncryptPassword(e.target.value)}
+                    />
+                    <button 
+                        onClick={handleEncrypt} 
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 mt-3 rounded-lg transition"
+                    >
+                        Encrypt & Upload
                     </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <Button type="button" variant="outline" className="mr-2" onClick={() => navigate("/")}>
-              Cancel
-            </Button>
-            <Button type="button" variant="primary" disabled={uploading || !file} onClick={handleUpload}>
-              {uploading ? "Uploading..." : "Upload to Lighthouse"}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    </div>
-  );
-};
+                </div>
 
-export default DocumentUpload;
+                {/* Decrypt File Section */}
+                <div>
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">Decrypt File</h3>
+                    <input
+                        type="text"
+                        placeholder="Enter filename"
+                        value={filename}
+                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => setFilename(e.target.value)}
+                    />
+                    <input
+                        type="password"
+                        placeholder="Enter decryption password"
+                        className="w-full px-4 py-2 border rounded-lg mt-3 focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => setDecryptPassword(e.target.value)}
+                    />
+                    <button 
+                        onClick={handleDecrypt} 
+                        className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 mt-3 rounded-lg transition"
+                    >
+                        Decrypt & Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default App;
