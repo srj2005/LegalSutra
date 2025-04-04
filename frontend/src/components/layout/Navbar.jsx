@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { logout } from "../../lib/firebase";
-import { User } from "lucide-react"; // Importing User icon from lucide-react
+import { User } from "lucide-react";
 
 const Navbar = () => {
   const { user } = useAuth();
@@ -14,12 +14,19 @@ const Navbar = () => {
           <>
             <span className="mr-4">{user.displayName}</span>
             <Link
-              to="/profile"
+              to={`/home/${user.displayName}`}
+              className="text-gray-300 hover:text-white transition"
+            >
+              Home
+            </Link>
+            <Link
+              to={`/profile/${user.displayName}`}
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 hover:text-white transition"
             >
               <User className="mr-1 h-5 w-5" />
               Profile
             </Link>
+            
             <button
               onClick={logout}
               className="bg-red-500 px-4 py-2 rounded text-white hover:bg-red-600 transition"

@@ -3,7 +3,8 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
-import { FileText, AlertTriangle, CheckCircle, BarChart2 } from "lucide-react"
+import { FileText, AlertTriangle, CheckCircle, BarChart2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const SummaryGeneration = () => {
   const { documentId } = useParams()
@@ -11,6 +12,7 @@ const SummaryGeneration = () => {
   const [document, setDocument] = useState(null)
   const [summary, setSummary] = useState(null)
   const [error, setError] = useState("")
+  const {user}=useAuth();
 
   useEffect(() => {
     const fetchDocumentAndGenerateSummary = async () => {
@@ -140,7 +142,7 @@ const SummaryGeneration = () => {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Document Summary</h1>
-          <Link to={`/analysis/${documentId}`}>
+          <Link to={`/analysis/${user.displayName}/${documentId}`}>
             <Button variant="primary">
               <BarChart2 className="mr-2 h-4 w-4" />
               View Risk Analysis

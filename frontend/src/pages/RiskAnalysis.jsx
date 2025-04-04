@@ -5,6 +5,7 @@ import { useParams, Link } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button"
 import { FileText, AlertTriangle, CheckCircle, ArrowLeft, Info, Shield } from "lucide-react"
+import { useAuth } from "../context/AuthContext";
 
 const RiskAnalysis = () => {
   const { documentId } = useParams()
@@ -12,6 +13,7 @@ const RiskAnalysis = () => {
   const [document, setDocument] = useState(null)
   const [analysis, setAnalysis] = useState(null)
   const [error, setError] = useState("")
+  const {user}= useAuth();
 
   useEffect(() => {
     const fetchDocumentAndAnalysis = async () => {
@@ -213,7 +215,7 @@ const RiskAnalysis = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center mb-6">
-          <Link to={`/summary/${documentId}`} className="mr-4">
+          <Link to={`/summary/${user.displayName}/${documentId}`} className="mr-4">
             <Button variant="outline" size="sm">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to Summary
